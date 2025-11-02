@@ -5,6 +5,8 @@ import { ProtectedRoute } from "../ProtectedRoute";
 import Link from "next/link";
 import type { Profile } from "@/lib/types";
 
+
+/* Find Matches Page */
 export default function MatchPage() {
   const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<Profile>({
@@ -93,13 +95,50 @@ export default function MatchPage() {
   }
 
   async function loadGroups() {
+    if (!user?.id) return;
     try {
       const res = await fetch("/api/groups");
-      if (res.ok) {
-        const text = await res.text();
-        const data = text ? JSON.parse(text) : { groups: [] };
-        setGroups(data.groups || []);
+      if (!res.ok) return;
+      const text = await res.text();
+      const allGroups = text ? JSON.parse(text).groups || [] : [];
+      
+      // Filter to only show groups where user is a member
+      let userProfileName = "";
+      try {
+        const profileRes = await fetch(`/api/profile?user_id=${user.id}`);
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          userProfileName = profileData.profile?.name?.trim() || "";
+        }
+      } catch (err) {
+        console.error("Failed to load profile:", err);
       }
+      const userEmailPrefix = user?.email?.split("@")[0] || "";
+      
+      // Check membership for each group
+      const membershipChecks = await Promise.all(
+        allGroups.map(async (group: { id: string; name: string }) => {
+          try {
+            const membersRes = await fetch(`/api/groups/${group.id}/members`);
+            if (membersRes.ok) {
+              const membersData = await membersRes.json();
+              const members = membersData.members || [];
+              const isMember = members.some((m: { user_name: string }) => 
+                (userProfileName && m.user_name === userProfileName) ||
+                (!userProfileName && m.user_name === userEmailPrefix)
+              );
+              return isMember ? group : null;
+            }
+            return null;
+          } catch (err) {
+            console.error(`Error checking membership for group ${group.id}:`, err);
+            return null;
+          }
+        })
+      );
+      
+      const userGroups = membershipChecks.filter((g): g is { id: string; name: string } => g !== null);
+      setGroups(userGroups);
     } catch (err) {
       console.error("Failed to load groups:", err);
     }
@@ -403,23 +442,27 @@ export default function MatchPage() {
                       <div className="mt-2 text-xs text-gray-500">
                         Click to view detailed profile →
                       </div>
-                      {groups.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (groups.length === 0) {
+                              if (confirm("You need to create or join a group first. Would you like to go to the Groups page?")) {
+                                window.location.href = "/groups";
+                              }
+                            } else {
                               setInviteModalOpen(r.profile.name);
-                            }}
-                            disabled={invitingToGroup !== null}
-                            className="w-full px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
-                            style={{ backgroundColor: '#B22222', color: 'white' }}
-                            onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#991919')}
-                            onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#B22222')}
-                          >
-                            Invite to Roommate Group
-                          </button>
-                        </div>
-                      )}
+                            }
+                          }}
+                          disabled={invitingToGroup !== null}
+                          className="w-full px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
+                          style={{ backgroundColor: '#B22222', color: 'white' }}
+                          onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#991919')}
+                          onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#B22222')}
+                        >
+                          Invite to Roommate Group
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -529,7 +572,7 @@ export default function MatchPage() {
                 {/* Friction Points */}
                 {selectedMatch.friction && selectedMatch.friction.length > 0 && (
                   <div>
-                    <div className="text-xs font-semibold text-orange-600 mb-2">⚠️ Potential Friction Points</div>
+                    <div className="text-xs font-semibold text-orange-600 mb-2">Potential Friction Points</div>
                     <ul className="list-disc list-inside space-y-1">
                       {selectedMatch.friction.map((f: string, idx: number) => (
                         <li key={idx} className="text-sm text-gray-700">{f}</li>
@@ -541,7 +584,7 @@ export default function MatchPage() {
                 {/* Tips */}
                 {selectedMatch.tips && selectedMatch.tips.length > 0 && (
                   <div>
-                    <div className="text-xs font-semibold mb-2" style={{ color: '#B22222' }}>💡 Tips for Living Together</div>
+                    <div className="text-xs font-semibold mb-2" style={{ color: '#B22222' }}>Tips for Living Together</div>
                     <ul className="list-disc list-inside space-y-1">
                       {selectedMatch.tips.map((tip: string, idx: number) => (
                         <li key={idx} className="text-sm text-gray-700">{tip}</li>
@@ -551,24 +594,28 @@ export default function MatchPage() {
                 )}
 
                 {/* Invite Button */}
-                {groups.length > 0 && (
-                  <div className="pt-4 border-t border-gray-200">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
+                <div className="pt-4 border-t border-gray-200">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (groups.length === 0) {
+                        if (confirm("You need to create or join a group first. Would you like to go to the Groups page?")) {
+                          window.location.href = "/groups";
+                        }
+                      } else {
                         setSelectedMatch(null);
                         setInviteModalOpen(selectedMatch.profile.name);
-                      }}
-                      disabled={invitingToGroup !== null}
-                      className="w-full px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
-                      style={{ backgroundColor: '#B22222', color: 'white' }}
-                      onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#991919')}
-                      onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#B22222')}
-                    >
-                      Invite to Roommate Group
-                    </button>
-                  </div>
-                )}
+                      }
+                    }}
+                    disabled={invitingToGroup !== null}
+                    className="w-full px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50"
+                    style={{ backgroundColor: '#B22222', color: 'white' }}
+                    onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#991919')}
+                    onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#B22222')}
+                  >
+                    Invite to Roommate Group
+                  </button>
+                </div>
               </div>
             </div>
           )}
