@@ -1,0 +1,192 @@
+import { NextRequest, NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase";
+
+export const runtime = "nodejs";
+
+// Test user profiles to seed into the database
+const testUsers = [
+  {
+    user_id: "00000000-0000-0000-0000-000000000001",
+    name: "Alex",
+    major: "Biology",
+    bio: "Early riser, likes quiet mornings. Very organized and clean.",
+    sleep_sched: "early",
+    cleanliness: "high",
+    noise: "quiet",
+    guests: "rare",
+    budget_min: 500,
+    budget_max: 750,
+    interests: ["gym", "hiking", "cooking"]
+  },
+  {
+    user_id: "00000000-0000-0000-0000-000000000002",
+    name: "Sam",
+    major: "Computer Science",
+    bio: "Night owl, into gaming and coffee. Pretty relaxed about cleaning.",
+    sleep_sched: "late",
+    cleanliness: "medium",
+    noise: "moderate",
+    guests: "sometimes",
+    budget_min: 600,
+    budget_max: 900,
+    interests: ["gaming", "anime", "boba"]
+  },
+  {
+    user_id: "00000000-0000-0000-0000-000000000003",
+    name: "Jordan",
+    major: "Psychology",
+    bio: "Calm, loves plants and tidy spaces. Meditates daily.",
+    sleep_sched: "normal",
+    cleanliness: "high",
+    noise: "quiet",
+    guests: "rare",
+    budget_min: 550,
+    budget_max: 800,
+    interests: ["reading", "plants", "yoga"]
+  },
+  {
+    user_id: "00000000-0000-0000-0000-000000000004",
+    name: "Morgan",
+    major: "Engineering",
+    bio: "Study-focused, needs quiet time. Organized but not obsessive.",
+    sleep_sched: "normal",
+    cleanliness: "medium",
+    noise: "quiet",
+    guests: "rare",
+    budget_min: 600,
+    budget_max: 850,
+    interests: ["coding", "reading", "coffee"]
+  },
+  {
+    user_id: "00000000-0000-0000-0000-000000000005",
+    name: "Casey",
+    major: "Business",
+    bio: "Social butterfly, loves hosting friends. Keeps things moderately clean.",
+    sleep_sched: "normal",
+    cleanliness: "medium",
+    noise: "moderate",
+    guests: "often",
+    budget_min: 700,
+    budget_max: 1000,
+    interests: ["networking", "events", "travel"]
+  },
+  {
+    user_id: "00000000-0000-0000-0000-000000000006",
+    name: "Riley",
+    major: "Art",
+    bio: "Creative and laid-back. Works on projects at all hours.",
+    sleep_sched: "late",
+    cleanliness: "low",
+    noise: "moderate",
+    guests: "sometimes",
+    budget_min: 500,
+    budget_max: 700,
+    interests: ["art", "music", "photography"]
+  },
+  {
+    user_id: "00000000-0000-0000-0000-000000000007",
+    name: "Taylor",
+    major: "Environmental Science",
+    bio: "Eco-conscious, early to bed early to rise. Very tidy and organized.",
+    sleep_sched: "early",
+    cleanliness: "high",
+    noise: "quiet",
+    guests: "sometimes",
+    budget_min: 550,
+    budget_max: 750,
+    interests: ["sustainability", "gardening", "cycling"]
+  },
+  {
+    user_id: "00000000-0000-0000-0000-000000000008",
+    name: "Quinn",
+    major: "Music",
+    bio: "Practices instruments daily. Can be loud but respectful of quiet hours.",
+    sleep_sched: "normal",
+    cleanliness: "medium",
+    noise: "loud",
+    guests: "sometimes",
+    budget_min: 600,
+    budget_max: 800,
+    interests: ["music", "concerts", "instruments"]
+  },
+  {
+    user_id: "00000000-0000-0000-0000-000000000009",
+    name: "Bailey",
+    major: "Mathematics",
+    bio: "Quiet student, prefers minimal distractions. Very clean and organized.",
+    sleep_sched: "early",
+    cleanliness: "high",
+    noise: "quiet",
+    guests: "rare",
+    budget_min: 650,
+    budget_max: 850,
+    interests: ["math", "puzzles", "board games"]
+  },
+  {
+    user_id: "00000000-0000-0000-0000-000000000010",
+    name: "Skyler",
+    major: "Communications",
+    bio: "Outgoing and friendly. Likes to keep common areas clean.",
+    sleep_sched: "normal",
+    cleanliness: "medium",
+    noise: "moderate",
+    guests: "often",
+    budget_min: 600,
+    budget_max: 900,
+    interests: ["social media", "photography", "travel"]
+  }
+];
+
+export async function POST(req: NextRequest) {
+  if (!supabase) {
+    return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
+  }
+
+  try {
+    // Upsert all test users
+    const { data, error } = await supabase
+      .from("user_profiles")
+      .upsert(testUsers, {
+        onConflict: "user_id",
+      })
+      .select();
+
+    if (error) {
+      console.error("Error seeding users:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      message: `Successfully seeded ${data?.length || 0} test users`,
+      users: data 
+    }, { status: 200 });
+  } catch (err: any) {
+    console.error("Seed error:", err);
+    return NextResponse.json({ error: err.message || "Failed to seed users" }, { status: 500 });
+  }
+}
+
+export async function GET(req: NextRequest) {
+  if (!supabase) {
+    return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("user_profiles")
+      .select("*")
+      .limit(20);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      count: data?.length || 0,
+      users: data 
+    }, { status: 200 });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || "Failed to fetch users" }, { status: 500 });
+  }
+}
+

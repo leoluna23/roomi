@@ -77,18 +77,30 @@ export default function MatchPage() {
     }
     setLoading(true);
     try {
-      const res = await fetch("/demo-candidates.json");
-      const candidates = await res.json();
+      // Fetch candidates from database instead of JSON file
       const matchRes = await fetch("/api/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ me: profile, candidates }),
+        body: JSON.stringify({ 
+          me: profile, 
+          user_id: user?.id // Send user_id to fetch candidates from database
+        }),
       });
+      
+      if (!matchRes.ok) {
+        const error = await matchRes.json();
+        throw new Error(error.error || "Failed to find matches");
+      }
+      
       const data = await matchRes.json();
       setResults(data.results || []);
+      
+      if (data.message) {
+        alert(data.message);
+      }
     } catch (err) {
       console.error("Match error:", err);
-      alert("Failed to find matches. Please try again.");
+      alert(err instanceof Error ? err.message : "Failed to find matches. Please try again.");
     } finally {
       setLoading(false);
     }
