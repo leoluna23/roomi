@@ -325,7 +325,7 @@ export default function MediatePage() {
                 onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#991919')}
                 onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#B22222')}
               >
-                {mediating ? "Processing..." : "Generate Message"}
+                {mediating ? "Processing..." : "Let's Find a Solution!"}
               </button>
             </div>
           </section>

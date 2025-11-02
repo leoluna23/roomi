@@ -466,7 +466,17 @@ export default function SchedulePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTask),
       });
-      const data = await res.json();
+      
+      let data;
+      const text = await res.text();
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        console.error("Failed to parse response:", text);
+        alert(`Failed to add task: Invalid response from server`);
+        return;
+      }
+      
       if (res.ok) {
         setNewTask({
           title: "",
@@ -479,9 +489,11 @@ export default function SchedulePage() {
           end_date: "",
         });
         loadTasks();
+        alert("Task created successfully!");
       } else {
-        alert(`Failed to add task: ${data.error || "Unknown error"}`);
-        console.error("API error:", data);
+        const errorMessage = data?.error || text || "Unknown error";
+        alert(`Failed to add task: ${errorMessage}`);
+        console.error("API error:", { status: res.status, statusText: res.statusText, data, text });
       }
     } catch (err) {
       console.error("Failed to create task:", err);

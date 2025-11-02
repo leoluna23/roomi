@@ -20,11 +20,13 @@ CREATE TABLE IF NOT EXISTS tasks (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  freq TEXT NOT NULL CHECK (freq IN ('weekly', 'biweekly')),
+  freq TEXT NOT NULL CHECK (freq IN ('daily', 'every_other_day', 'weekly', 'biweekly', 'monthly')),
   preferred_day INTEGER CHECK (preferred_day >= 0 AND preferred_day <= 6),
   preferred_time TEXT,
   duration_min INTEGER,
   notes TEXT,
+  start_date DATE,
+  end_date DATE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
