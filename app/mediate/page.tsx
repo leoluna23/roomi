@@ -212,13 +212,19 @@ export default function MediatePage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowTemplates(!showTemplates)}
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg text-white transition-all shadow-sm hover:shadow-md"
+                  style={{ backgroundColor: '#B22222' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#991919'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#B22222'}
                 >
                   {showTemplates ? "Hide" : "Show"} Templates
                 </button>
                 <button
                   onClick={() => setShowTips(!showTips)}
-                  className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                  className="px-3 py-1.5 text-xs font-medium rounded-lg text-white transition-all shadow-sm hover:shadow-md"
+                  style={{ backgroundColor: '#B22222' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#991919'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#B22222'}
                 >
                   {showTips ? "Hide" : "Show"} Tips
                 </button>
@@ -234,8 +240,10 @@ export default function MediatePage() {
                     <button
                       key={type}
                       onClick={() => applyTemplate(type)}
-                      className="px-3 py-2 text-xs font-medium rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all text-left capitalize"
-                      style={{ backgroundColor: 'white' }}
+                      className="px-3 py-2 text-xs font-medium rounded-lg text-white transition-all shadow-sm hover:shadow-md text-left capitalize"
+                      style={{ backgroundColor: '#B22222' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#991919'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#B22222'}
                     >
                       {type.replace("_", " ")}
                     </button>
@@ -357,7 +365,10 @@ export default function MediatePage() {
                   <div className="text-xs font-medium text-gray-600">Edit Message (optional):</div>
                   <button
                     onClick={() => copyToClipboard(editedMessage || mediation.message)}
-                    className="px-3 py-1 text-xs font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                    className="px-3 py-1 text-xs font-medium rounded-lg text-white transition-all shadow-sm hover:shadow-md"
+                    style={{ backgroundColor: '#B22222' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#991919'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#B22222'}
                   >
                     {copySuccess ? "✓ Copied!" : "Copy"}
                   </button>
@@ -384,7 +395,10 @@ export default function MediatePage() {
                         <span className="text-xs text-gray-700 flex-1">{opener}</span>
                         <button
                           onClick={() => copyToClipboard(opener)}
-                          className="ml-2 px-2 py-1 text-xs font-medium rounded border border-gray-300 hover:bg-gray-50 transition-colors"
+                          className="ml-2 px-2 py-1 text-xs font-medium rounded text-white transition-all shadow-sm hover:shadow-md"
+                          style={{ backgroundColor: '#B22222' }}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#991919'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#B22222'}
                         >
                           Copy
                         </button>
@@ -412,7 +426,10 @@ export default function MediatePage() {
                     setIssue("");
                     setEditedMessage("");
                   }}
-                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all shadow-sm hover:shadow-md"
+                  style={{ backgroundColor: '#B22222' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#991919'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#B22222'}
                 >
                   Start New
                 </button>
@@ -442,7 +459,10 @@ export default function MediatePage() {
                     setHistory([]);
                     localStorage.removeItem("mediationHistory");
                   }}
-                  className="text-xs text-gray-500 hover:text-gray-700"
+                  className="px-3 py-1 text-xs font-medium rounded-lg text-white transition-all shadow-sm hover:shadow-md"
+                  style={{ backgroundColor: '#B22222' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#991919'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#B22222'}
                 >
                   Clear
                 </button>
